@@ -1,4 +1,4 @@
-import edu.princeton.cs.algs4.WeightedQuickUnionUF;
+import edu.princeton.cs.algs4.StdRandom;
 
 public class Percolation {
 
@@ -10,13 +10,10 @@ public class Percolation {
 
         int root;
 
-        boolean isBottomOrTopRowSite;
 
-
-        public Site(int id, boolean isOpen, int root, boolean topOrBottom) {
+        public Site(int id, boolean isOpen, int root) {
             this.isOpen = isOpen;
             this.root = root;
-            this.isBottomOrTopRowSite = topOrBottom;
             this.id = id;
         }
 
@@ -40,20 +37,21 @@ public class Percolation {
     public Percolation(int n) {
         gridSize = n;
         arraySize = n * n;
+        grid = new Site[arraySize + 2];
         topNode = n * n;
         bottomNode = topNode + 1;
         for (int i = 0; i < arraySize; i++) {
             if (i / n == 0) {
-                grid[i] = new Site(i, false, topNode, true);
+                grid[i] = new Site(i, false, topNode);
             } else if (i / n == n -1) {
-                grid[i] = new Site(i, false, bottomNode, true);
+                grid[i] = new Site(i, false, bottomNode);
             } else {
-                grid[i] = new Site(i, false, i, false);
+                grid[i] = new Site(i, false, i);
             }
 
         }
-        grid[topNode] = new Site(topNode, true, topNode, true);
-        grid[bottomNode] = new Site(bottomNode, true, bottomNode, true);
+        grid[topNode] = new Site(topNode, true, topNode);
+        grid[bottomNode] = new Site(bottomNode, true, bottomNode);
     }
 
     public void open(int givenRow, int givenCol) throws IllegalArgumentException {
@@ -61,16 +59,16 @@ public class Percolation {
         int col = givenCol - 1;
         int gridIndex = row * gridSize + col;
 
-        if (row <= 0 || col <= 0 || row > topNode || col > topNode) {
-            throw new IllegalArgumentException("Row or Column indexes are out of bound");
+        if (row < 0 || col < 0 || row >= gridSize || col >= gridSize) {
+            throw new IllegalArgumentException("Row or Column indexes are out of bound, row: " + row + ", col: " + col);
         }
         grid[gridIndex].makeSiteOpen();
-        openSites =+ 1;
+        openSites += 1;
 
-        for(int i = row - 1; i <= row + 1; i =+ 2) {
-            for(int j = col -1; j <= col + 1; j =+ 2) {
+        for(int i = row - 1; i <= row + 1; i += 2) {
+            for(int j = col -1; j <= col + 1; j += 2) {
                 if (i >= 0 && j >= 0 && i < gridSize && j < gridSize) {
-                    if(isOpen(i, j)){
+                    if(isOpen(i + 1, j + 1)){
                         int site = returnArrayIndex(i, j);
                         union(gridIndex, site);
                     }
@@ -111,13 +109,13 @@ public class Percolation {
      return root(first) == root(second);
     }
 
-    public boolean isOpen(int row, int col) throws IllegalArgumentException {
-        int actualRow = row - 1;
-        int actualCol = col - 1;
-        int index = actualRow * gridSize + actualCol;
+    public boolean isOpen(int givenRow, int givenCol) throws IllegalArgumentException {
+        int row = givenRow - 1;
+        int col = givenCol - 1;
+        int index = row * gridSize + col;
 
-        if (actualRow <= 0 || actualCol <= 0 || actualRow > topNode || actualCol > topNode) {
-            throw new IllegalArgumentException("Row or Column indexes are out of bound");
+        if (row < 0 || col < 0 || row >= gridSize || col >= gridSize) {
+            throw new IllegalArgumentException("Row or Column indexes are out of bound, row: " + row + ", col: " + col);
         }
 
         return grid[index].isOpen;
@@ -131,7 +129,24 @@ public class Percolation {
 
     public boolean percolates() {return grid[bottomNode].root == topNode;}
 
-    public static void main(String[] args)
+    public static void main(String[] args) {
+        int gridSize = 20;
+        Percolation percolation = new Percolation(gridSize);
+        while(!percolation.percolates()) {
+            int row = StdRandom.uniform(1 ,gridSize + 1);
+            int col = StdRandom.uniform(1, gridSize + 1);
+            if(!percolation.isOpen(row, col)){
+                percolation.open(row, col);
+            }
+            int openSites = percolation.numberOfOpenSites();
+            Site[] changedGrid = percolation.grid;
+            System.out.println("Number of open sites: " + openSites);
+            if(percolation.percolates()){
+                System.out.println("System percolates with " + openSites);
+            }
+
+        }
+    }
 
 
 }
