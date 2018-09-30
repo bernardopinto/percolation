@@ -1,30 +1,21 @@
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
-import java.lang.Math;
-
 public class PercolationStats {
 
-    private Percolation[] percolation;
+    private final int gridSize;
 
-    private int gridSize;
+    private final double siteAmount;
 
-    private double siteAmount;
-
-    private int trials;
+    private final int trials;
 
     private double[] percolationResults;
 
     public PercolationStats(int n, int trials) {
-        percolation = new Percolation[trials];
         gridSize = n;
         this.siteAmount = n * n;
         this.trials = trials;
         percolationResults = new double[trials];
-
-        for (int i = 0; i < trials; i++) {
-            percolation[i] = new Percolation(n);
-        }
     }
 
     public double mean() {
@@ -49,15 +40,15 @@ public class PercolationStats {
 
     private double[] runPercolation() {
         for (int i = 0; i < trials; i++) {
-            Percolation innerPercolation = percolation[i];
-            while (!innerPercolation.percolates()) {
+            Percolation loopPercolation = new Percolation(gridSize);
+            while (!loopPercolation.percolates()) {
                 int row = StdRandom.uniform(1, gridSize + 1);
                 int col = StdRandom.uniform(1, gridSize + 1);
-                if (!innerPercolation.isOpen(row, col)) {
-                    innerPercolation.open(row, col);
+                if (!loopPercolation.isOpen(row, col)) {
+                    loopPercolation.open(row, col);
                 }
             }
-            double openSites = innerPercolation.numberOfOpenSites();
+            double openSites = loopPercolation.numberOfOpenSites();
             percolationResults[i] = openSites / siteAmount;
         }
         return percolationResults;

@@ -2,6 +2,14 @@ import edu.princeton.cs.algs4.StdRandom;
 
 public class Percolation {
 
+    private final Site[] grid;
+
+    private final int topNode;
+    private final int bottomNode;
+    private final int arraySize;
+    private final int gridSize;
+    private int openSites;
+
     private class Site {
 
         boolean isOpen;
@@ -23,13 +31,7 @@ public class Percolation {
         }
     }
 
-    private Site[] grid;
 
-    private int topNode;
-    private int bottomNode;
-    private int arraySize;
-    private int gridSize;
-    private int openSites;
 
     public Percolation(int n) {
         gridSize = n;
@@ -63,12 +65,18 @@ public class Percolation {
         openSites += 1;
 
         for (int i = row - 1; i <= row + 1; i += 2) {
-            for (int j = col - 1; j <= col + 1; j += 2) {
-                if (i >= 0 && j >= 0 && i < gridSize && j < gridSize) {
-                    if (isOpen(i + 1, j + 1)) {
-                        int site = returnArrayIndex(i, j);
+                if (i >= 0 && i < gridSize) {
+                    if (isOpen(i + 1, col + 1)) {
+                        int site = returnArrayIndex(i, col);
                         union(gridIndex, site);
                     }
+                }
+        }
+        for (int j = col - 1; j <= col + 1; j += 2) {
+            if (j >= 0 && j < gridSize) {
+                if(isOpen(row + 1, j + 1)) {
+                    int site = returnArrayIndex(row, j);
+                    union(gridIndex, site);
                 }
             }
         }
@@ -118,8 +126,8 @@ public class Percolation {
         return grid[index].isOpen;
     }
 
-    public boolean isFull(int row, int col) {
-        return root(returnArrayIndex(row, col)) == topNode;
+    public boolean isFull(int givenRow, int givenCol) {
+        return (isOpen(givenRow, givenCol) && root(returnArrayIndex(givenRow - 1, givenCol - 1)) == topNode);
     }
 
     public int numberOfOpenSites() {
@@ -131,21 +139,12 @@ public class Percolation {
     }
 
     public static void main(String[] args) {
-        int gridSize = 20;
-        Percolation percolation = new Percolation(gridSize);
-        while (!percolation.percolates()) {
-            int row = StdRandom.uniform(1, gridSize + 1);
-            int col = StdRandom.uniform(1, gridSize + 1);
-            if (!percolation.isOpen(row, col)) {
-                percolation.open(row, col);
-            }
-            int openSites = percolation.numberOfOpenSites();
-            System.out.println("Number of open sites: " + openSites);
-            if (percolation.percolates()) {
-                System.out.println("System percolates with " + openSites);
-            }
+        Percolation percolation = new Percolation(2);
+        percolation.open(1, 1);
+        percolation.open(2, 1);
+        boolean percolates = percolation.percolates();
+        System.out.println("percolates = " + percolates);
 
-        }
     }
 
 
