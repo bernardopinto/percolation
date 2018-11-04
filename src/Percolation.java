@@ -2,7 +2,8 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
 
-    private final WeightedQuickUnionUF quickUnion;
+    private final WeightedQuickUnionUF percolationGrid;
+    private final WeightedQuickUnionUF isFullGrid;
     private final boolean[][] isOpen;
 
     private final int gridSize;
@@ -17,18 +18,29 @@ public class Percolation {
         }
         gridSize = n;
         isOpen = new boolean[n][n];
-        quickUnion = new WeightedQuickUnionUF(n * n + 2);
+        percolationGrid = new WeightedQuickUnionUF(n * n + 2);
+        isFullGrid = new WeightedQuickUnionUF(n * n + 1);
 
         topNode = n * n;
         bottomNode = topNode + 1;
 
+
+        // Join first row in percolation grid to top node
         for (int i = 0; i < n; i++) {
-            quickUnion.union(i, topNode);
+            percolationGrid.union(i, topNode);
         }
 
+        // Join last row in percolation grid to bottom node
         for (int i = n * (n - 1); i < n * n; i++) {
-            quickUnion.union(i, bottomNode);
+            percolationGrid.union(i, bottomNode);
         }
+
+        // Join first row in isFull grid to topNode
+        for (int i = 0; i < n; i++) {
+            isFullGrid.union(i, topNode);
+        }
+
+
     }
 
     public void open(int givenRow, int givenCol) {
@@ -47,7 +59,8 @@ public class Percolation {
                 if (isOpen[i][col]) {
                     int topAndBottomRowNode = getArrayIndex(i, col);
                     int currentNodeIndex = getArrayIndex(row, col);
-                    quickUnion.union(currentNodeIndex, topAndBottomRowNode);
+                    percolationGrid.union(currentNodeIndex, topAndBottomRowNode);
+                    isFullGrid.union(currentNodeIndex, topAndBottomRowNode);
                 }
             }
         }
@@ -57,7 +70,8 @@ public class Percolation {
                 if (isOpen[row][j]) {
                     int topAndBottomRowNode = getArrayIndex(row, j);
                     int currentNodeIndex = getArrayIndex(row, col);
-                    quickUnion.union(currentNodeIndex, topAndBottomRowNode);
+                    percolationGrid.union(currentNodeIndex, topAndBottomRowNode);
+                    isFullGrid.union(currentNodeIndex, topAndBottomRowNode);
                 }
             }
         }
@@ -80,7 +94,7 @@ public class Percolation {
 
         int node = getArrayIndex(row, col);
 
-        return quickUnion.connected(node, topNode) && isOpen[row][col];
+        return isFullGrid.connected(node, topNode) && isOpen[row][col];
     }
 
     public int numberOfOpenSites() {
@@ -88,8 +102,10 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        boolean connected = quickUnion.connected(topNode, bottomNode);
-        if(gridSize == 1) return isOpen[0][0] && connected; else return connected;
+        boolean connected = percolationGrid.connected(topNode, bottomNode);
+        if (gridSize == 1)
+            return isOpen[0][0] && connected;
+        else return connected;
     }
 
     private int getArrayIndex(int actualRow, int actualCol) {
@@ -98,18 +114,29 @@ public class Percolation {
 
     // Parameters must be converted from client entries to correct coordinates
     private void assertIndexes(int row, int col) {
-        if (row < 0 || row >= gridSize || col < 0 || row >= gridSize) {
+        if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) {
             throw new IllegalArgumentException("Insert valid cell coordinates");
         }
     }
 
-    //psvm command intellij :)
+    // psvm command intellij :)
     public static void main(String[] args) {
-        Percolation percolation = new Percolation(1);
+        Percolation percolation = new Percolation(3);
+
+        percolation.open(1, 1);
+        percolation.open(2, 1);
+        percolation.open(3, 1);
+        percolation.open(1, 2);
+        percolation.open(2, 3);
+        percolation.open(3, 3);
+
+        boolean isFull33 = percolation.isFull(3, 3);
 
         boolean percolates = percolation.percolates();
 
         int numOpenSites = percolation.numberOfOpenSites();
+
+        System.out.println("isFull33 = " + isFull33);
 
 
         System.out.println("percolates = " + percolates);
