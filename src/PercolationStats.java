@@ -6,8 +6,6 @@ public class PercolationStats {
 
     private final int trials;
 
-    private final double[] percolationResults;
-
     private final double mean;
 
     private final double stddev;
@@ -19,7 +17,7 @@ public class PercolationStats {
 
         int siteAmount = n * n;
         this.trials = trials;
-        percolationResults = new double[trials];
+        final double[] percolationResults = new double[trials];
         for (int i = 0; i < trials; i++) {
             Percolation percolation = new Percolation(n);
             while (!percolation.percolates()) {
